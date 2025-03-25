@@ -1,0 +1,122 @@
+﻿@page
+@model WeatherModel
+@{
+    ViewData["Title"] = "Weather";
+}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,
+								initial-scale=1.0">
+<h1>@ViewData["Title"]</h1>
+
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<p>To view the current weather in your city or state, get started from here.</p>
+<form method="post" asp-page="weather" asp-page-handler="Weather">
+    <div>
+        <!--<label for="cityInput">Enter City Name:</label>-->
+        <div class="fx fx-gap">
+            <div class="search__container">
+                <input class="search__input" type="text" placeholder="Enter Your City Name" id="cityInput" />
+            </div>
+        
+            <div id="search-icon">
+                <button type="button" id="addCity">
+                        <div id="search-icon-circle"></div>
+                        <span></span>
+                </button>
+            </div>
+        </div>
+        <Div id="selectedCitiesList"></Div>  
+    <!-- <h5>Selected Cities:</h5>
+    <ul id="selectedCitiesList"></ul>
+
+         Hidden input to store selected cities for form submission -->
+    <input type="hidden" id="selectedCities" asp-for="SelectedCities" /> 
+    <br />
+        <input type="submit" name="Submit" value="Search" class="btn-primary search" id="search" onclick="search()" />
+    </div>
+    <div id="selectedCitiesPreview" style="margin-top: 10px; font-weight: bold;"></div>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div style="color: red;">
+        <strong>Error:</strong> @Model.ErrorMessage
+    </div>
+}
+
+@if (Model.WeatherData != null)
+{
+    <div class="weather-container">
+    @foreach(WeatherApplication.Models.WeatherDetails WeatherData in Model.WeatherData)
+    {
+            <div class="weather-box animate__animated animate__fadeIn">
+                <h5> @WeatherData.Address</h5> @*<h5> @WeatherData.weathericon</h5>*@
+                <img src=@WeatherData.weathericon alt="Weather Icon" class="weather-icon" title="@WeatherData.days[0].Icon"/>
+                <p>Date : @WeatherData.days[0].datetime</p>
+                    <p>Max Temprature : @WeatherData.days[0].tempmax</p>
+                    <p>Min Temprature : @WeatherData.days[0].tempmin</p>
+           </div>
+    }
+    </div>
+    
+}
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let cityInput = document.getElementById("cityInput");
+        let selectedCitiesList = document.getElementById("selectedCitiesList");
+        let selectedCitiesInput = document.getElementById("selectedCities");
+        let addCityButton = document.getElementById("addCity");
+        let searchButton = document.getElementById("search");
+
+        let selectedCities = new Set(); // Store selected cities
+
+        addCityButton.addEventListener("click", function () {
+            let cityValue = cityInput.value.trim(); // Get input value
+
+            if (cityValue && !selectedCities.has(cityValue)) {
+                selectedCities.add(cityValue);
+
+                // Create list item with remove button
+                let listItem = document.createElement("li");
+                listItem.innerHTML = `${cityValue}<span class="material-icons" id = "remove-icon" data - value="${cityValue}">&#xe872; </span>`;
+                
+                selectedCitiesList.appendChild(listItem);
+
+                // Update hidden input field for submission
+                selectedCitiesInput.value = Array.from(selectedCities).join(",");
+                    searchButton.style.display = "inline-block";////////
+
+                // Clear input field after adding
+                cityInput.value = "";
+            }
+            else
+            {
+                alert("Input can't be empty");
+            }
+        });
+
+        // Remove selected city
+        selectedCitiesList.addEventListener("click", function (event) {
+            if (event.target.classList.contains("material-icons")) {
+                let cityValue = event.target.getAttribute("data-value");
+                selectedCities.delete(cityValue);
+                event.target.parentElement.remove(); // Remove list item from UI
+                selectedCitiesInput.value = Array.from(selectedCities).join(",");
+                searchButton.style.display = "none";////////
+            }
+        });
+
+        function search() {
+            // Hide the search button while results are loading
+            searchButton.style.display = "none";
+
+            // Simulate loading results (you can replace this with actual API call)
+            setTimeout(function () {
+                alert("Loading results...");
+            }, 1000);
+        }
+    });
+</script>
